@@ -1,11 +1,10 @@
 git
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref } from "vue";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import Swal from "sweetalert2";
-import { Modal } from "bootstrap";
 
 let conjunto = ref([
   { id: "00", premio: "", valor: 0, nombre: "", fecha: "", estado: 2 },
@@ -134,9 +133,8 @@ let fondo = ref("");
 let loteria = ref("");
 let numeroGanador = ref("");
 let id = ref("");
-/*let des = ref(false);
+let des = ref(false);
 let inicio = ref(true);
-let mostrarFormulario = ref(true);*/
 
 function clasico() {
   fondo_modal = "#5b6980";
@@ -252,7 +250,7 @@ function sacar() {
 }
 
 function editar(p, i) {
-  /*des.value = true;*/
+  des.value = true;
   nombre.value = p.nombre;
   telefono.value = p.telefono;
   direccion.value = p.direccion;
@@ -282,13 +280,12 @@ function cam() {
     pintar.value = "Completa el campo de Dirección";
     cambiocolor.value = "background-color:#ff4d4d;";
   } else {
-    conjunto.value[guard2.value] = {
-      nombre: nombre.value,
-      telefono: telefono.value,
-      direccion: direccion.value,
-      estado: estado.value,
-    };
-
+    for (let i = 0; i <= 99; i++) {
+      conjunto.value[guard2.value].nombre = nombre.value;
+      conjunto.value[guard2.value].telefono = telefono.value;
+      conjunto.value[guard2.value].direccion = direccion.value;
+      conjunto.value[guard2.value].estado = estado.value;
+    }
     pintar.value = "Registro exitoso.";
     cambiocolor.value = "background-color:#0be881;";
   }
@@ -300,8 +297,7 @@ function cam() {
 }
 
 function camgeneral() {
-  /*inicio.value = false;*/
-
+  inicio.value = true;
   let expresionvalor = /^\d+(\.\d{1,2})?$/;
   let verifivalor = expresionvalor.test(valor.value);
 
@@ -366,10 +362,62 @@ const registros = ref([]);
   console.log(registros.value);
 };*/
 
-function seleccionarGanador() {
+/*function seleccionarGanador() {
   numeroGanador = Math.floor(Math.random() * 100) + 1;
   Swal.fire("El número ganador es: " + numeroGanador);
 }
+
+function generarPDF() {
+  const doc = new jsPDF();
+
+  doc.text("Talonario", 90, 10);
+  doc.text(`Fecha del Sorteo: ${fecha.value}`, 10, 30);
+  doc.text(`Ganador: ${numeroGanador.value}`, 10, 40);
+  doc.text(`Lotería: ${loteria.value}`, 100, 30);
+  doc.text(`Premio: ${premio.value}`, 100, 40);
+
+  const headers = [["Nombre", "Teléfono", "Dirección", "N° boleta", "Valor", "Estado"]];
+
+  const data = conjunto.value.map((enlis) => [
+    enlis.nombre,
+    enlis.telefono,
+    enlis.direccion,
+    enlis.id,
+    enlis.valor,
+    enlis.estado == 1 ? "Vendido" : enlis.estado == 2 ? "Disponible" : "Debe",
+  ]);
+
+  doc.autoTable({
+    startY: 50,
+    head: headers,
+    body: data,
+  });
+
+  let sumaBoletasDebe = 0;
+  let sumaBoletasEnJuego = 0;
+
+  conjunto.value.forEach((enlis) => {
+    if (enlis.estado == 3) {
+      sumaBoletasDebe += enlis.valor;
+    }
+    if (enlis.estado == 1) {
+      sumaBoletasEnJuego += enlis.valor;
+    }
+  });
+
+  doc.text(
+    `Suma de Boletas que Deben: ${sumaBoletasDebe}`,
+    10,
+    doc.autoTable.previous.finalY + 10
+  );
+  doc.text(
+    `Suma de Boletas en Juego: ${sumaBoletasEnJuego}`,
+    10,
+    doc.autoTable.previous.finalY + 20
+  );
+
+  doc.save("talonario.pdf");
+}*/
 
 function generarPDF() {
   const doc = new jsPDF();
@@ -390,7 +438,7 @@ function generarPDF() {
       enlis.direccion,
       enlis.id,
       enlis.valor,
-      enlis.estado == 1 ? "Vendido" : enlis.estado == 2 ? "Disponible" : "Debe",
+      enlis.estado === 1 ? "Vendido" : enlis.estado === 2 ? "Disponible" : "Debe",
     ]);
 
   doc.autoTable({
@@ -424,11 +472,6 @@ function generarPDF() {
 
   doc.save("talonario.pdf");
 }
-
-/*let modal = document.getElementById("modalEdicionGlobal");
-
-let modalInstance = new bootstrap.Modal(modal);
-modalInstance.show();*/
 </script>
 
 <template>
@@ -460,10 +503,11 @@ modalInstance.show();*/
         <p>Generar PDF</p>
       </div>
 
+      <!--
       <div type="button" @click="seleccionarGanador" id="numeroGanador">
         <img src="../src/assets/recursos_pag_loteria/balota.jpg" alt="" />
         <p>Elegir Ganador</p>
-      </div>
+      </div>-->
     </div>
 
     <div class="datos">
@@ -480,10 +524,10 @@ modalInstance.show();*/
       <div class="fecha">
         <p>🗓️{{ fecha }}</p>
       </div>
-      <!--  <div class="nombre_loteria">
+      <div class="nombre_loteria">
         <img src="../src/assets/recursos_pag_loteria/banco_nombrebanco.png" alt="" />
         <p>{{ loteria }}</p>
-      </div>-->
+      </div>
     </div>
 
     <div
@@ -495,8 +539,7 @@ modalInstance.show();*/
       aria-labelledby="staticBackdropLabel"
       aria-hidden="true"
     >
-      <div class="modal-dialog">
-        <!-- v-show="des" -->
+      <div class="modal-dialog" v-show="des">
         <div class="modal-content">
           <div class="modal-header">
             <h1 class="modal-title fs-5" id="staticBackdropLabel">
@@ -564,61 +607,52 @@ modalInstance.show();*/
       aria-labelledby="staticBackdropLabel"
       aria-hidden="true"
     >
-      <div
-        class="modal"
-        id="modalEdicionGlobal"
-        tabindex="-1"
-        aria-labelledby="modalEdicionGlobalLabel"
-        aria-hidden="true"
-      >
-        <div class="modal-dialog">
-          <!-- v-show="inicio" -->
-          <div class="modal-content">
-            <div class="modal-header">
-              <h1 class="modal-title" id="modalEdicionGlobalLabel">Edición Global</h1>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
-            </div>
-            <div class="modal-body">
-              <p>Premio</p>
-              <input v-model="premio" placeholder="Ingresa el premio" type="text" />
-              <p>valor boleta</p>
-              <input v-model="valor" placeholder="valor de la boleta" type="number" />
-              <p>Fecha Fin</p>
-              <input v-model="fecha" placeholder="Fecha en la que juega" type="date" />
-              <p>Loteria</p>
+      <div class="modal-dialog" v-show="inicio">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="staticBackdropLabel">Edicion Global</h1>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <p>Premio</p>
+            <input v-model="premio" placeholder="Ingresa el premio" type="text" />
+            <p>valor boleta</p>
+            <input v-model="valor" placeholder="valor de la boleta" type="number" />
+            <p>Fecha Fin</p>
+            <input v-model="fecha" placeholder="Fecha en la que juega" type="date" />
+            <p>Loteria</p>
 
-              <select name="loteria" v-model="loteria">
-                <br /><br />
-                <option value="santander">Santander</option>
-                <option value="bogota">Bogotá</option>
-                <option value="cruzroja">Cruz Roja</option>
-                <option value="cundinamarca">Cundinamarca</option>
-                <option value="manizales">Manizales</option>
-              </select>
-            </div>
-            <div class="modal-footer">
-              <div style="display: flex">
-                <h1
-                  style="
-                    font-size: 20px;
-                    border-radius: 10px;
-                    height: 35px;
-                    margin-right: 50px;
-                    padding: 5px;
-                    width: 300px;
-                    text-align: center;
-                  "
-                  v-bind:style="cambiocolor"
-                >
-                  {{ pintar }}
-                </h1>
-                <button class="btn btn-primary" @click="camgeneral()">guardar</button>
-              </div>
+            <select name="loteria" v-model="loteria">
+              <br /><br />
+              <option value="santander">Santander</option>
+              <option value="bogota">Bogotá</option>
+              <option value="cruzroja">Cruz Roja</option>
+              <option value="cundinamarca">Cundinamarca</option>
+              <option value="manizales">Manizales</option>
+            </select>
+          </div>
+          <div class="modal-footer">
+            <div style="display: flex">
+              <h1
+                style="
+                  font-size: 20px;
+                  border-radius: 10px;
+                  height: 35px;
+                  margin-right: 50px;
+                  padding: 5px;
+                  width: 300px;
+                  text-align: center;
+                "
+                v-bind:style="cambiocolor"
+              >
+                {{ pintar }}
+              </h1>
+              <button class="btn btn-primary" @click="camgeneral()">guardar</button>
             </div>
           </div>
         </div>
@@ -1137,6 +1171,41 @@ input {
   color: rgb(184, 203, 219);
 }
 
+.btn-close {
+  background: blue;
+}
+
+@media (max-width: 1250) {
+  .cuadrilla {
+    top: 10vh;
+    left: 30vh;
+    width: 70vh;
+    display: flex;
+    flex-wrap: wrap;
+    background: v-bind(fondo_cuadrilla);
+    border: v-bind(bordes);
+    border-radius: 11px;
+    position: absolute;
+    cursor: pointer;
+    padding: 15px;
+    padding-bottom: 40px;
+    margin: 3%;
+    margin-bottom: 10vh;
+  }
+
+  .opciones {
+    position: relative;
+    left: 175%;
+    width: 30vw;
+    top: 3vh;
+    z-index: 5;
+  }
+  .datos {
+    position: relative;
+    bottom: 65vh;
+    left: -30vw;
+  }
+}
 @media (max-width: 1150px) {
   .cuadrilla {
     top: 10vh;
