@@ -260,7 +260,11 @@ function editar(p, i) {
 }
 
 function cam() {
-  /*des.value = false;*/
+  if (!des.value) {
+    // Si des.value es falso, no haces nada
+    return;
+  }
+
   let expresionnombre = /^[a-zA-Z\s]+$/;
   let verifinombre = expresionnombre.test(nombre.value);
 
@@ -270,30 +274,38 @@ function cam() {
   let expresiondir = /^[a-zA-Z0-9\s]+$/;
   let verifidir = expresiondir.test(direccion.value);
 
-  if (verifinombre === false) {
+  if (!verifinombre) {
     pintar.value = "Llena el campo Nombre";
     cambiocolor.value = "background-color:#ff4d4d;";
-  } else if (verifitel === false) {
+  } else if (!verifitel) {
     pintar.value = "Debes llenar el campo Teléfono";
     cambiocolor.value = "background-color:#ff4d4d;";
-  } else if (verifidir === false) {
+  } else if (!verifidir) {
     pintar.value = "Completa el campo de Dirección";
     cambiocolor.value = "background-color:#ff4d4d;";
   } else {
-    for (let i = 0; i <= 99; i++) {
-      conjunto.value[guard2.value].nombre = nombre.value;
-      conjunto.value[guard2.value].telefono = telefono.value;
-      conjunto.value[guard2.value].direccion = direccion.value;
-      conjunto.value[guard2.value].estado = estado.value;
-    }
+    // Actualizar el valor de conjunto.value[guard2.value] una vez, sin necesidad de un bucle
+    conjunto.value[guard2.value].nombre = nombre.value;
+    conjunto.value[guard2.value].telefono = telefono.value;
+    conjunto.value[guard2.value].direccion = direccion.value;
+    conjunto.value[guard2.value].estado = estado.value;
+
     pintar.value = "Registro exitoso.";
     cambiocolor.value = "background-color:#0be881;";
-  }
 
-  setTimeout(() => {
-    cambiocolor.value = "";
-    pintar.value = "";
-  }, 3000);
+    setTimeout(() => {
+      cambiocolor.value = "";
+      pintar.value = "";
+    }, 3000);
+
+    // Limpiar los campos de entrada después de editar
+    nombre.value = "";
+    telefono.value = "";
+    direccion.value = "";
+    estado.value = "";
+    guard.value = "";
+    guard2.value = "";
+  }
 }
 
 function camgeneral() {
@@ -353,6 +365,38 @@ function camgeneral() {
       pintar.value = "";
     }, 3000);
   }
+}
+
+// Definir el talonario con los números disponibles
+const talonario = [];
+
+// Función para seleccionar un ganador
+function seleccionarGanador(numeroGanador) {
+  // Validar que se haya ingresado un número
+  if (!numeroGanador || isNaN(numeroGanador)) {
+    console.log("Por favor ingresa un número válido.");
+    return;
+    Swal.fire("Por favor ingresa un número válido.");
+  }
+
+  // Convertir el número ganador a entero
+  numeroGanador = parseInt(numeroGanador);
+
+  // Validar que el número ganador esté en el talonario
+  if (!talonario.includes(numeroGanador)) {
+    console.log("El número ganador no está en el talonario.");
+    return;
+    Swal.fire("El número ganador no está en el talonario.");
+  }
+
+  // Filtrar los ganadores que coinciden con el número ingresado
+  const ganadores = talonario.filter((numero) => numero === numeroGanador);
+
+  // Seleccionar un ganador aleatorio de entre los que coinciden
+  const ganadorAleatorio = ganadores[Math.floor(Math.random() * ganadores.length)];
+
+  console.log("El ganador es el número", ganadorAleatorio);
+  Swal.fire("El ganador es el número " + ganadorAleatorio);
 }
 
 const registros = ref([]);
@@ -527,6 +571,13 @@ function generarPDF() {
       <div class="nombre_loteria">
         <img src="../src/assets/recursos_pag_loteria/banco_nombrebanco.png" alt="" />
         <p>{{ loteria }}</p>
+      </div>
+      <div class="Ganador">
+        <h6>Seleccionar Ganador</h6>
+        <label for="numeroGanador">Número Ganador:</label>
+        <input type="text" id="numeroGanador" placeholder="Escribe el número Ganador " />
+        <br />
+        <button onclick="seleccionarGanador()">Ganador</button>
       </div>
     </div>
 
@@ -1174,7 +1225,24 @@ input {
 .btn-close {
   background: blue;
 }
+.Ganador {
+  display: grid;
 
+  color: white;
+  text-align: center;
+}
+
+button {
+  border-radius: 30%;
+  background-color: rgba(191, 191, 248, 0.212);
+  margin-right: 10%;
+}
+
+#numeroGanador {
+  font-size: medium;
+  color: rgb(247, 168, 168);
+  margin-right: 20%;
+}
 @media (max-width: 1250) {
   .cuadrilla {
     top: 10vh;
