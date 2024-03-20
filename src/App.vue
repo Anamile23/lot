@@ -136,6 +136,8 @@ let id = ref("");
 let des = ref(false);
 let inicio = ref(true);
 
+
+
 function clasico() {
   fondo_modal = "#5b6980";
   hover = "#4a6e86";
@@ -310,7 +312,7 @@ function cam() {
 
 function camgeneral() {
   inicio.value = true;
-  let expresionvalor = /^\d+(\.\d{1,2})?$/;
+  let expresionvalor = /^[^\s]+( [^\s]+)*$/;
   let verifivalor = expresionvalor.test(valor.value);
 
   let expresionfecha = /^(?!\s*$)\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
@@ -344,7 +346,7 @@ function camgeneral() {
     pintar.value = "Fecha inválida.";
     cambiocolor.value = "background-color:#ff4d4d;";
   } else if (veriloteria === "") {
-    pintar.value = "Debes Seleccionar una loteria";
+    pintar.value = "Seleccionar  loteria";
     cambiocolor.value = "background-color:#ff4d4d;";
     setTimeout(() => {
       cambiocolor.value = "";
@@ -368,7 +370,7 @@ function camgeneral() {
 }
 
 // Definir el talonario con los números disponibles
-const talonario = [];
+/*const talonario = [];
 
 // Función para seleccionar un ganador
 function seleccionarGanador(numeroGanador) {
@@ -383,14 +385,14 @@ function seleccionarGanador(numeroGanador) {
   numeroGanador = parseInt(numeroGanador);
 
   // Validar que el número ganador esté en el talonario
-  if (!talonario.includes(numeroGanador)) {
+  if (!conjunto.includes(numeroGanador)) {
     console.log("El número ganador no está en el talonario.");
     return;
     Swal.fire("El número ganador no está en el talonario.");
   }
 
   // Filtrar los ganadores que coinciden con el número ingresado
-  const ganadores = talonario.filter((numero) => numero === numeroGanador);
+  const ganadores = conjunto.filter((numero) => numero === numeroGanador);
 
   // Seleccionar un ganador aleatorio de entre los que coinciden
   const ganadorAleatorio = ganadores[Math.floor(Math.random() * ganadores.length)];
@@ -398,6 +400,7 @@ function seleccionarGanador(numeroGanador) {
   console.log("El ganador es el número", ganadorAleatorio);
   Swal.fire("El ganador es el número " + ganadorAleatorio);
 }
+seleccionarGanador()*/
 
 const registros = ref([]);
 
@@ -516,6 +519,115 @@ function generarPDF() {
 
   doc.save("talonario.pdf");
 }
+let ganadorAleatorio=ref("")
+// Definir el talonario con los números disponibles
+const talonario = [0,1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99  ];
+
+// Función para seleccionar un ganador
+function seleccionarGanador(numeroGanador) {
+  // Validar que se haya ingresado un número
+  if (!numeroGanador || isNaN(numeroGanador)) {
+    console.log("Por favor ingresa un número válido.");
+    return;
+  }
+
+  // Convertir el número ganador a entero
+  numeroGanador = parseInt(numeroGanador);
+
+  // Validar que el número ganador esté en el talonario
+  if (!talonario.includes(numeroGanador)) {
+    console.log("El número ganador no está en el talonario.");
+    return;
+  }
+
+  // Filtrar los ganadores que coinciden con el número ingresado
+  const ganadores = talonario.filter(numero => numero === numeroGanador);
+
+  // Seleccionar un ganador aleatorio de entre los que coinciden
+  
+  const ganadorAleatorio = ganadores[Math.floor(Math.random() * ganadores.length)];
+  Swal.fire({
+  title: '¡Número ganador!',
+  text: 'El número ganador es: ' + ganadorAleatorio,
+  icon: 'success',
+  confirmButtonColor: 'yellow',
+});
+console.log("%cEl ganador es el número " + ganadorAleatorio, "color: yellow; font-weight: bold;");
+
+}
+
+// Ejemplo de uso
+seleccionarGanador(); // Cambia el número aquí para seleccionar un ganador diferente
+
+function guardarNumeroLoteria() {
+  // Simulación de una operación asincrónica con setTimeout
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      console.log("Número de lotería guardado:", numeroLoteria.value);
+      resolve();
+    }, 0); // 
+  });
+}
+
+async function guardarYBuscar() {
+  await guardarNumeroLoteria();
+  buscarComprador();
+}
+
+function buscarComprador() {
+  if (!numeroLoteria.value || isNaN(numeroLoteria.value) || numeroLoteria.value < 0 || numeroLoteria.value > 9999) {
+    console.error("El número de lotería no es válido");
+    return;
+  }
+
+  const ultimasCifras = numeroLoteria.value.toString().slice(-2);
+  console.log("Numero ganador:", ultimasCifras);
+
+  const compradorGanador = arrayRifa.value.find(comprador => comprador.id === ultimasCifras);
+
+  if (compradorGanador) {
+    if (compradorGanador.estado === 'disponible') {
+      error.value = "Numero no fue vendido"
+      setTimeout(() => {
+
+        error.value = ""
+      }, 3000)
+      console.log(error.value);
+      compradorGanador.estado = 'ganador';
+      compradorSeleccionado.value = compradorGanador;
+      mostrarDatosBoleta.value = true;
+      mostrarNumeroLoteriaBool.value = false
+
+
+    } else if (compradorGanador.estado === 'porPagar') {
+      error.value = "Numero fue vendido pero boleta no fue cancelada por lo tanto no se entrega el premio"
+      setTimeout(() => {
+
+        error.value = ""
+      }, 3000)
+      console.log(error.value);
+      compradorGanador.estado = 'ganador';
+
+      compradorSeleccionado.value = compradorGanador;
+      mostrarDatosBoleta.value = true;
+      mostrarNumeroLoteriaBool.value = false
+      totalPorPagar.value = totalPorPagar + totalGanadora
+    }
+    else {
+
+      compradorGanador.estado = 'ganador';
+
+      compradorSeleccionado.value = compradorGanador;
+      mostrarDatosBoleta.value = true;
+      mostrarNumeroLoteriaBool.value = false
+      totalPagadas.value = totalPagadas.value + totalGanadora.value
+    }
+  }
+}
+function formatoConUnidades(numero) {
+    return numero.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); 
+}
+
 </script>
 
 <template>
@@ -547,6 +659,14 @@ function generarPDF() {
         <p>Generar PDF</p>
       </div>
 
+      <!-- numero de loteria 
+      <div v-if="mostrarNumeroLoteriaBool" class="numeroLoteria">
+        <button type="button" class="buttonCerrarComprador" @click="cerrarLoteria()">❌</button>
+        <p>N° ganador: {{Nloteria }}</p>
+        <input type="number" v-model="numeroLoteria" placeholder="Número de 4 cifras"> <br>
+        <button @click="guardarYBuscar()" class="buttonGeneral"  >N° gandor</button>
+      </div>-->
+
       <!--
       <div type="button" @click="seleccionarGanador" id="numeroGanador">
         <img src="../src/assets/recursos_pag_loteria/balota.jpg" alt="" />
@@ -559,26 +679,29 @@ function generarPDF() {
         INFORMACIÓN
       </div>
       <div class="premio">
-        <p>🏆{{ premio }}</p>
+        <p>🏆{{ formatoConUnidades(premio)}}</p>
       </div>
       <div class="valor_loteria">
         >
-        <p>💲{{ valor }}</p>
+        <p>💲{{ formatoConUnidades(valor) }}</p>
       </div>
       <div class="fecha">
         <p>🗓️{{ fecha }}</p>
+
       </div>
+      
       <div class="nombre_loteria">
         <img src="../src/assets/recursos_pag_loteria/banco_nombrebanco.png" alt="" />
         <p>{{ loteria }}</p>
       </div>
+        <!--
       <div class="Ganador">
         <h6>Seleccionar Ganador</h6>
         <label for="numeroGanador">Número Ganador:</label>
         <input type="text" id="numeroGanador" placeholder="Escribe el número Ganador " />
         <br />
         <button onclick="seleccionarGanador()">Ganador</button>
-      </div>
+      </div>-->
     </div>
 
     <div
@@ -590,7 +713,7 @@ function generarPDF() {
       aria-labelledby="staticBackdropLabel"
       aria-hidden="true"
     >
-      <div class="modal-dialog" v-show="des">
+      <div class="modal-dialog" id="z">
         <div class="modal-content">
           <div class="modal-header">
             <h1 class="modal-title fs-5" id="staticBackdropLabel">
@@ -673,9 +796,12 @@ function generarPDF() {
             <p>Premio</p>
             <input v-model="premio" placeholder="Ingresa el premio" type="text" />
             <p>valor boleta</p>
-            <input v-model="valor" placeholder="valor de la boleta" type="number" />
+            <input v-model="valor" placeholder="valor de la boleta" type="text" />
             <p>Fecha Fin</p>
             <input v-model="fecha" placeholder="Fecha en la que juega" type="date" />
+            <p>numero ganador</p>
+            <input v-model="ganadorAleatorio" placeholder="numero ganador " type="text" />
+            
             <p>Loteria</p>
 
             <select name="loteria" v-model="loteria">
@@ -1240,7 +1366,7 @@ button {
 
 #numeroGanador {
   font-size: medium;
-  color: rgb(247, 168, 168);
+  color: rgb(3, 3, 3);
   margin-right: 20%;
 }
 @media (max-width: 1250) {
@@ -1484,4 +1610,5 @@ button {
     margin: 3px;
   }
 }
+
 </style>
