@@ -1,10 +1,11 @@
 git
 <script setup>
-import { ref } from "vue";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-import Swal from "sweetalert2";
+import { ref } from "vue"
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
+import Swal from 'sweetalert2'
+
 
 let conjunto = ref([
   { id: "00", premio: "", valor: 0, nombre: "", fecha: "", estado: 2 },
@@ -108,6 +109,7 @@ let conjunto = ref([
   { id: "98", premio: "", valor: 0, nombre: "", fecha: "", estado: 2 },
   { id: "99", premio: "", valor: 0, nombre: "", fecha: "", estado: 2 },
 ]);
+
 let guard2 = ref("");
 let enlistadovalue = ref("");
 let cambiocolor = ref("");
@@ -135,8 +137,6 @@ let numeroGanador = ref("");
 let id = ref("");
 let des = ref(false);
 let inicio = ref(true);
-
-
 
 function clasico() {
   fondo_modal = "#5b6980";
@@ -273,17 +273,17 @@ function cam() {
   let expresiontel = /^\d{8,}$/;
   let verifitel = expresiontel.test(telefono.value);
 
-  let expresiondir = /^[a-zA-Z0-9\s]+$/;
+  let expresiondir = /^[a-zA-Z0-9\s!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+$/;
   let verifidir = expresiondir.test(direccion.value);
 
   if (!verifinombre) {
     pintar.value = "Llena el campo Nombre";
     cambiocolor.value = "background-color:#ff4d4d;";
   } else if (!verifitel) {
-    pintar.value = "Debes llenar el campo Teléfono";
+    pintar.value = "Debes llenar  Teléfono";
     cambiocolor.value = "background-color:#ff4d4d;";
   } else if (!verifidir) {
-    pintar.value = "Completa el campo de Dirección";
+    pintar.value = "Completa el campo  Dirección";
     cambiocolor.value = "background-color:#ff4d4d;";
   } else {
     // Actualizar el valor de conjunto.value[guard2.value] una vez, sin necesidad de un bucle
@@ -300,6 +300,8 @@ function cam() {
       pintar.value = "";
     }, 3000);
 
+    document.getElementById("close").click();
+
     // Limpiar los campos de entrada después de editar
     nombre.value = "";
     telefono.value = "";
@@ -308,11 +310,20 @@ function cam() {
     guard.value = "";
     guard2.value = "";
   }
+  console.log("conjunto");
+  console.log(conjunto.value);
+  console.log("conjunto");
+  let prueba = conjunto.value.filter((a) => {
+    return a.estado === "3";
+  });
+  console.log("prueba");
+  console.log(prueba);
+  console.log("prueba");
 }
 
 function camgeneral() {
   inicio.value = true;
-  let expresionvalor = /^[^\s]+( [^\s]+)*$/;
+  let expresionvalor = /^\d+(\.\d{1,2})?$/;
   let verifivalor = expresionvalor.test(valor.value);
 
   let expresionfecha = /^(?!\s*$)\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
@@ -325,9 +336,6 @@ function camgeneral() {
 
   let veriloteria = loteria.value;
 
-  console.log(verifipremio);
-  console.log(premio.value);
-
   if (verifipremio === false) {
     pintar.value = "Llena el campo Premio";
     cambiocolor.value = "background-color:#ff4d4d;";
@@ -336,7 +344,7 @@ function camgeneral() {
       pintar.value = "";
     }, 3000);
   } else if (verifivalor === false) {
-    pintar.value = "Debes llenar el campo Valor";
+    pintar.value = "Llena el campo Valor";
     cambiocolor.value = "background-color:#ff4d4d;";
     setTimeout(() => {
       cambiocolor.value = "";
@@ -346,7 +354,7 @@ function camgeneral() {
     pintar.value = "Fecha inválida.";
     cambiocolor.value = "background-color:#ff4d4d;";
   } else if (veriloteria === "") {
-    pintar.value = "Seleccionar  loteria";
+    pintar.value = "Seleccionar una loteria";
     cambiocolor.value = "background-color:#ff4d4d;";
     setTimeout(() => {
       cambiocolor.value = "";
@@ -369,50 +377,52 @@ function camgeneral() {
   }
 }
 
-// Definir el talonario con los números disponibles
-/*const talonario = [];
 
-// Función para seleccionar un ganador
-function seleccionarGanador(numeroGanador) {
-  // Validar que se haya ingresado un número
-  if (!numeroGanador || isNaN(numeroGanador)) {
-    console.log("Por favor ingresa un número válido.");
-    return;
-    Swal.fire("Por favor ingresa un número válido.");
+const talonario = [];
+
+
+// let numeroGanador = ref('');
+function seleccionarGanador() {
+  if (numeroGanador.value === "") {
+    console.log("Debe Ingresar el número ganador");
+    
+  } else {
+    for (let i = 0; i < conjunto.value.length; i++) {
+        const convertir = parseInt(numeroGanador.value);
+        conjunto.value[convertir].estado = '4';
+        if (conjunto.value[i].estado === '4') {
+          cambiocolor.value = "Green";
+        }
+    }Swal.fire("El ganador es el número " + numeroGanador.value);
   }
 
-  // Convertir el número ganador a entero
-  numeroGanador = parseInt(numeroGanador);
+  // // Validar que se haya ingresado un número
+  // if (!numeroGanador.value || isNaN(numeroGanador.value)) {
+  //   console.log("Por favor ingresa un número válido.");
+  //   return;
+  //   Swal.fire("Por favor ingresa un número válido.");
+  // }
 
-  // Validar que el número ganador esté en el talonario
-  if (!conjunto.includes(numeroGanador)) {
-    console.log("El número ganador no está en el talonario.");
-    return;
-    Swal.fire("El número ganador no está en el talonario.");
-  }
+  // // Convertir el número ganador a entero
+  // numeroGanador.value = parseInt(numeroGanador);
 
-  // Filtrar los ganadores que coinciden con el número ingresado
-  const ganadores = conjunto.filter((numero) => numero === numeroGanador);
+  // // Validar que el número ganador esté en el talonario
+  // if (!talonario.includes(numeroGanador.value)) {
+  //   console.log("El número ganador no está en el talonario.");
+  //   return;
+  //   Swal.fire("El número ganador no está en el talonario.");
+  // }
 
-  // Seleccionar un ganador aleatorio de entre los que coinciden
-  const ganadorAleatorio = ganadores[Math.floor(Math.random() * ganadores.length)];
+  // // Filtrar los ganadores que coinciden con el número ingresado
+  // const ganadores = talonario.filter((numero) => numero === numeroGanador.value);
 
-  console.log("El ganador es el número", ganadorAleatorio);
-  Swal.fire("El ganador es el número " + ganadorAleatorio);
+  // // Seleccionar un ganador aleatorio de entre los que coinciden
+  // const ganadorAleatorio = ganadores[Math.floor(Math.random() * ganadores.length)];
+
+  // console.log("El ganador es el número", ganadorAleatorio);
+  // Swal.fire("El ganador es el número " + ganadorAleatorio);
 }
-seleccionarGanador()*/
 
-const registros = ref([]);
-
-/*const addRegistro = (enlis) => {
-  registros.value.push(conjunto);
-  console.log(registros.value);
-};*/
-
-/*function seleccionarGanador() {
-  numeroGanador = Math.floor(Math.random() * 100) + 1;
-  Swal.fire("El número ganador es: " + numeroGanador);
-}
 
 function generarPDF() {
   const doc = new jsPDF();
@@ -424,15 +434,31 @@ function generarPDF() {
   doc.text(`Premio: ${premio.value}`, 100, 40);
 
   const headers = [["Nombre", "Teléfono", "Dirección", "N° boleta", "Valor", "Estado"]];
+  const data = [];
+  let sumaBoletasDebe = 0;
+  let sumaBoletasEnJuego = 0;
 
-  const data = conjunto.value.map((enlis) => [
-    enlis.nombre,
-    enlis.telefono,
-    enlis.direccion,
-    enlis.id,
-    enlis.valor,
-    enlis.estado == 1 ? "Vendido" : enlis.estado == 2 ? "Disponible" : "Debe",
-  ]);
+  for (let i = 0; i < conjunto.value.length; i++) {
+    const boleta = conjunto.value[i];
+    if (boleta.estado === '1' || boleta.estado === '3') {
+      data.push([
+        boleta.nombre,
+        boleta.telefono,
+        boleta.direccion,
+        boleta.id,
+        boleta.valor,
+        boleta.estado === '1' ? "Vendido" : "Debe"
+      ]);
+
+      if (boleta.estado === '3') {
+        sumaBoletasDebe += boleta.valor;
+      } else if (boleta.estado === '1') {
+        sumaBoletasEnJuego += boleta.valor;
+      }
+
+      //doc.text(`Número: ${boleta.id}   Nombre: ${boleta.nombre}   Teléfono: ${boleta.telefono}   Valor: ${boleta.valor}   Estado: ${boleta.estado === '1' ? "Vendido" : "Debe"}`, 30, 60 + i * 10);
+    }
+  }
 
   doc.autoTable({
     startY: 50,
@@ -440,190 +466,19 @@ function generarPDF() {
     body: data,
   });
 
-  let sumaBoletasDebe = 0;
-  let sumaBoletasEnJuego = 0;
-
-  conjunto.value.forEach((enlis) => {
-    if (enlis.estado == 3) {
-      sumaBoletasDebe += enlis.valor;
-    }
-    if (enlis.estado == 1) {
-      sumaBoletasEnJuego += enlis.valor;
-    }
-  });
-
-  doc.text(
-    `Suma de Boletas que Deben: ${sumaBoletasDebe}`,
-    10,
-    doc.autoTable.previous.finalY + 10
-  );
-  doc.text(
-    `Suma de Boletas en Juego: ${sumaBoletasEnJuego}`,
-    10,
-    doc.autoTable.previous.finalY + 20
-  );
-
-  doc.save("talonario.pdf");
-}*/
-
-function generarPDF() {
-  const doc = new jsPDF();
-
-  doc.text("Talonario", 90, 10);
-  doc.text(`Fecha del Sorteo: ${fecha.value}`, 10, 30);
-  doc.text(`Ganador: ${numeroGanador.value}`, 10, 40);
-  doc.text(`Lotería: ${loteria.value}`, 100, 30);
-  doc.text(`Premio: ${premio.value}`, 100, 40);
-
-  const headers = [["Nombre", "Teléfono", "Dirección", "N° boleta", "Valor", "Estado"]];
-
-  const data = conjunto.value
-    .filter((enlis) => enlis.estado === 3 || enlis.estado === 1)
-    .map((enlis) => [
-      enlis.nombre,
-      enlis.telefono,
-      enlis.direccion,
-      enlis.id,
-      enlis.valor,
-      enlis.estado === 1 ? "Vendido" : enlis.estado === 2 ? "Disponible" : "Debe",
-    ]);
-
-  doc.autoTable({
-    startY: 50,
-    head: headers,
-    body: data,
-  });
-
-  let sumaBoletasDebe = 0;
-  let sumaBoletasEnJuego = 0;
-
-  conjunto.value.forEach((enlis) => {
-    if (enlis.estado === 3) {
-      sumaBoletasDebe += enlis.valor;
-    }
-    if (enlis.estado === 1) {
-      sumaBoletasEnJuego += enlis.valor;
-    }
-  });
-
-  doc.text(
-    `Suma de Boletas que Deben: ${sumaBoletasDebe}`,
-    10,
-    doc.autoTable.previous.finalY + 10
-  );
-  doc.text(
-    `Suma de Boletas en Juego: ${sumaBoletasEnJuego}`,
-    10,
-    doc.autoTable.previous.finalY + 20
-  );
+  doc.text(`Suma de Boletas que Deben: ${sumaBoletasDebe}`, 10, doc.autoTable.previous.finalY + 10);
+  doc.text(`Suma de Boletas en Juego: ${sumaBoletasEnJuego}`, 10, doc.autoTable.previous.finalY + 20);
 
   doc.save("talonario.pdf");
 }
-let ganadorAleatorio=ref("")
-// Definir el talonario con los números disponibles
-const talonario = [0,1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99  ];
-
-// Función para seleccionar un ganador
-function seleccionarGanador(numeroGanador) {
-  // Validar que se haya ingresado un número
-  if (!numeroGanador || isNaN(numeroGanador)) {
-    console.log("Por favor ingresa un número válido.");
-    return;
-  }
-
-  // Convertir el número ganador a entero
-  numeroGanador = parseInt(numeroGanador);
-
-  // Validar que el número ganador esté en el talonario
-  if (!talonario.includes(numeroGanador)) {
-    console.log("El número ganador no está en el talonario.");
-    return;
-  }
-
-  // Filtrar los ganadores que coinciden con el número ingresado
-  const ganadores = talonario.filter(numero => numero === numeroGanador);
-
-  // Seleccionar un ganador aleatorio de entre los que coinciden
-  
-  const ganadorAleatorio = ganadores[Math.floor(Math.random() * ganadores.length)];
-  Swal.fire({
-  title: '¡Número ganador!',
-  text: 'El número ganador es: ' + ganadorAleatorio,
-  icon: 'success',
-  confirmButtonColor: 'yellow',
-});
-console.log("%cEl ganador es el número " + ganadorAleatorio, "color: yellow; font-weight: bold;");
-
-}
-
-// Ejemplo de uso
-seleccionarGanador(); // Cambia el número aquí para seleccionar un ganador diferente
-
-function guardarNumeroLoteria() {
-  // Simulación de una operación asincrónica con setTimeout
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      console.log("Número de lotería guardado:", numeroLoteria.value);
-      resolve();
-    }, 0); // 
-  });
-}
-
-async function guardarYBuscar() {
-  await guardarNumeroLoteria();
-  buscarComprador();
-}
-
-function buscarComprador() {
-  if (!numeroLoteria.value || isNaN(numeroLoteria.value) || numeroLoteria.value < 0 || numeroLoteria.value > 9999) {
-    console.error("El número de lotería no es válido");
-    return;
-  }
-
-  const ultimasCifras = numeroLoteria.value.toString().slice(-2);
-  console.log("Numero ganador:", ultimasCifras);
-
-  const compradorGanador = arrayRifa.value.find(comprador => comprador.id === ultimasCifras);
-
-  if (compradorGanador) {
-    if (compradorGanador.estado === 'disponible') {
-      error.value = "Numero no fue vendido"
-      setTimeout(() => {
-
-        error.value = ""
-      }, 3000)
-      console.log(error.value);
-      compradorGanador.estado = 'ganador';
-      compradorSeleccionado.value = compradorGanador;
-      mostrarDatosBoleta.value = true;
-      mostrarNumeroLoteriaBool.value = false
 
 
-    } else if (compradorGanador.estado === 'porPagar') {
-      error.value = "Numero fue vendido pero boleta no fue cancelada por lo tanto no se entrega el premio"
-      setTimeout(() => {
 
-        error.value = ""
-      }, 3000)
-      console.log(error.value);
-      compradorGanador.estado = 'ganador';
 
-      compradorSeleccionado.value = compradorGanador;
-      mostrarDatosBoleta.value = true;
-      mostrarNumeroLoteriaBool.value = false
-      totalPorPagar.value = totalPorPagar + totalGanadora
-    }
-    else {
 
-      compradorGanador.estado = 'ganador';
 
-      compradorSeleccionado.value = compradorGanador;
-      mostrarDatosBoleta.value = true;
-      mostrarNumeroLoteriaBool.value = false
-      totalPagadas.value = totalPagadas.value + totalGanadora.value
-    }
-  }
-}
+
+
 function formatoConUnidades(numero) {
     return numero.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); 
 }
@@ -658,50 +513,59 @@ function formatoConUnidades(numero) {
         <img src="../src/assets/recursos_pag_loteria/pdf.png" alt="" />
         <p>Generar PDF</p>
       </div>
+<!---->
+      <div type="button" @click="seleccionarGanador()" class="Ganador">
+        <img src="../src/assets/recursos_pag_loteria/balota.jpg" alt="" />
+        <p>Escribir No Ganador: <input type="text" id="numeroGanador" placeholder="Escribe el número" v-model="numeroGanador"></p>
+        
+      </div>
 
-      <!-- numero de loteria 
-      <div v-if="mostrarNumeroLoteriaBool" class="numeroLoteria">
-        <button type="button" class="buttonCerrarComprador" @click="cerrarLoteria()">❌</button>
-        <p>N° ganador: {{Nloteria }}</p>
-        <input type="number" v-model="numeroLoteria" placeholder="Número de 4 cifras"> <br>
-        <button @click="guardarYBuscar()" class="buttonGeneral"  >N° gandor</button>
-      </div>-->
-
-      <!--
+     <!-- <div class="Ganador">
+        <h6>Seleccionar Ganador</h6>
+        <label for="numeroGanador">Número Ganador:</label>
+        <input
+          type="text"
+          id="numeroGanador"
+          placeholder="Escribe el número Ganador "
+          v-model="numeroGanador"
+        />
+        <br />
+        <button @click="seleccionarGanador()">Ganador</button>
+      </div>
+      
       <div type="button" @click="seleccionarGanador" id="numeroGanador">
         <img src="../src/assets/recursos_pag_loteria/balota.jpg" alt="" />
         <p>Elegir Ganador</p>
       </div>-->
     </div>
-
+    
     <div class="datos">
-      <div type="button" class="general" data-bs-toggle="modal" data-bs-target="#3">
+      <div
+        type="button"
+        class="general"
+        data-bs-toggle="modal"
+        data-bs-target="#3"
+      >
         INFORMACIÓN
       </div>
       <div class="premio">
-        <p>🏆{{ formatoConUnidades(premio)}}</p>
+        <p>🏆{{ formatoConUnidades(premio) }}</p>
       </div>
       <div class="valor_loteria">
         >
-        <p>💲{{ formatoConUnidades(valor) }}</p>
+        <p>💲{{ formatoConUnidades(valor) }}</p>
       </div>
       <div class="fecha">
         <p>🗓️{{ fecha }}</p>
-
       </div>
-      
       <div class="nombre_loteria">
-        <img src="../src/assets/recursos_pag_loteria/banco_nombrebanco.png" alt="" />
+        <img
+          src="../src/assets/recursos_pag_loteria/banco_nombrebanco.png"
+          alt=""
+        />
         <p>{{ loteria }}</p>
       </div>
-        <!--
-      <div class="Ganador">
-        <h6>Seleccionar Ganador</h6>
-        <label for="numeroGanador">Número Ganador:</label>
-        <input type="text" id="numeroGanador" placeholder="Escribe el número Ganador " />
-        <br />
-        <button onclick="seleccionarGanador()">Ganador</button>
-      </div>-->
+     
     </div>
 
     <div
@@ -713,13 +577,14 @@ function formatoConUnidades(numero) {
       aria-labelledby="staticBackdropLabel"
       aria-hidden="true"
     >
-      <div class="modal-dialog" id="z">
+      <div class="modal-dialog" v-show="des">
         <div class="modal-content">
           <div class="modal-header">
             <h1 class="modal-title fs-5" id="staticBackdropLabel">
               Estas editando la boleta {{ guard }}
             </h1>
             <button
+              id="close"
               type="button"
               class="btn-close"
               data-bs-dismiss="modal"
@@ -784,7 +649,9 @@ function formatoConUnidades(numero) {
       <div class="modal-dialog" v-show="inicio">
         <div class="modal-content">
           <div class="modal-header">
-            <h1 class="modal-title fs-5" id="staticBackdropLabel">Edicion Global</h1>
+            <h1 class="modal-title fs-5" id="staticBackdropLabel">
+              Edicion Global
+            </h1>
             <button
               type="button"
               class="btn-close"
@@ -794,14 +661,23 @@ function formatoConUnidades(numero) {
           </div>
           <div class="modal-body">
             <p>Premio</p>
-            <input v-model="premio" placeholder="Ingresa el premio" type="text" />
+            <input
+              v-model="premio"
+              placeholder="Ingresa el premio"
+              type="text"
+            />
             <p>valor boleta</p>
-            <input v-model="valor" placeholder="valor de la boleta" type="text" />
+            <input
+              v-model="valor"
+              placeholder="valor de la boleta"
+              type="number"
+            />
             <p>Fecha Fin</p>
-            <input v-model="fecha" placeholder="Fecha en la que juega" type="date" />
-            <p>numero ganador</p>
-            <input v-model="ganadorAleatorio" placeholder="numero ganador " type="text" />
-            
+            <input
+              v-model="fecha"
+              placeholder="Fecha en la que juega"
+              type="date"
+            />
             <p>Loteria</p>
 
             <select name="loteria" v-model="loteria">
@@ -829,7 +705,9 @@ function formatoConUnidades(numero) {
               >
                 {{ pintar }}
               </h1>
-              <button class="btn btn-primary" @click="camgeneral()">guardar</button>
+              <button class="btn btn-primary" @click="camgeneral()">
+                guardar
+              </button>
             </div>
           </div>
         </div>
@@ -848,7 +726,11 @@ function formatoConUnidades(numero) {
       <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
           <div class="modal-header">
-            <h1 style="display: flex" class="modal-title fs-5" id="staticBackdropLabel">
+            <h1
+              style="display: flex"
+              class="modal-title fs-5"
+              id="staticBackdropLabel"
+            >
               <p style="padding-right: 45px; font-size: 20px">
                 Elije uno de los estados:
               </p>
@@ -894,8 +776,12 @@ function formatoConUnidades(numero) {
 
                   <td>
                     <b style="color: red" v-if="p.estado == 3">En deuda</b>
-                    <b style="color: blue" v-else-if="p.estado == 2">Disponible</b>
-                    <b style="color: #1dd1a1" v-else-if="p.estado == 1">En juego</b>
+                    <b style="color: blue" v-else-if="p.estado == 2"
+                      >Disponible</b
+                    >
+                    <b style="color: #1dd1a1" v-else-if="p.estado == 1"
+                      >En juego</b
+                    >
                   </td>
                 </tr>
               </tbody>
@@ -964,6 +850,18 @@ function formatoConUnidades(numero) {
           {{ p.id }}
         </button>
 
+        <button
+          v-if="p.estado == 4"
+          style="background-color: yellow"
+          type="button"
+          id="numeros"
+          class="btn btn-light"
+          data-bs-toggle="modal"
+          data-bs-target="#1"
+        >
+          {{ p.id }}
+        </button>
+
         <!-- Modal -->
         <div
           class="modal fade"
@@ -997,7 +895,9 @@ function formatoConUnidades(numero) {
                 <div style="display: flex">
                   <b style="margin-right: 5px">ESTADO: </b>
                   <div style="color: #1dd1a1" v-if="estado == 1">En juego</div>
-                  <div style="color: blue" v-else-if="estado == 2">Disponible</div>
+                  <div style="color: blue" v-else-if="estado == 2">
+                    Disponible
+                  </div>
                   <div style="color: red" v-else>En deuda</div>
                 </div>
 
@@ -1028,7 +928,9 @@ function formatoConUnidades(numero) {
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h1 class="modal-title fs-5" id="exampleModalLabel">Personalizar</h1>
+              <h1 class="modal-title fs-5" id="exampleModalLabel">
+                Personalizar
+              </h1>
               <button
                 type="button"
                 class="btn-close"
@@ -1046,7 +948,11 @@ function formatoConUnidades(numero) {
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
                 cerrar
               </button>
             </div>
@@ -1349,13 +1255,16 @@ input {
 }
 
 .btn-close {
-  background: blue;
+  background: rgba(188, 188, 243, 0.76);
+  color: #ccffd7;
 }
 .Ganador {
-  display: grid;
-
-  color: white;
+  /*
+ display: flex;
   text-align: center;
+  justify-content: center;*/
+ 
+   color: white;
 }
 
 button {
@@ -1365,9 +1274,12 @@ button {
 }
 
 #numeroGanador {
-  font-size: medium;
-  color: rgb(3, 3, 3);
-  margin-right: 20%;
+/**/display: flex;
+  text-align: center;
+  justify-content:center;
+  color: rgb(0, 0, 0);
+  width: 35%;
+  margin-bottom: 10%;
 }
 @media (max-width: 1250) {
   .cuadrilla {
@@ -1610,5 +1522,4 @@ button {
     margin: 3px;
   }
 }
-
 </style>
