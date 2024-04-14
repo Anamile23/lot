@@ -137,6 +137,10 @@ let numeroGanador = ref("");
 let id = ref("");
 let des = ref(false);
 let inicio = ref(true);
+let mj= ref(false);
+
+
+  
 
 function clasico() {
   fondo_modal = "#5b6980";
@@ -322,6 +326,7 @@ function cam() {
 }
 
 function camgeneral() {
+  mj.value=true
   inicio.value = true;
   let expresionvalor = /^\d+(\.\d{1,2})?$/;
   let verifivalor = expresionvalor.test(valor.value);
@@ -381,7 +386,7 @@ function camgeneral() {
 const talonario = [];
 
 
-// let numeroGanador = ref('');
+
 function seleccionarGanador() {
   if (numeroGanador.value === "") {
     console.log("Debe Ingresar el número ganador");
@@ -396,31 +401,7 @@ function seleccionarGanador() {
     }Swal.fire("El ganador es el número " + numeroGanador.value);
   }
 
-  // // Validar que se haya ingresado un número
-  // if (!numeroGanador.value || isNaN(numeroGanador.value)) {
-  //   console.log("Por favor ingresa un número válido.");
-  //   return;
-  //   Swal.fire("Por favor ingresa un número válido.");
-  // }
-
-  // // Convertir el número ganador a entero
-  // numeroGanador.value = parseInt(numeroGanador);
-
-  // // Validar que el número ganador esté en el talonario
-  // if (!talonario.includes(numeroGanador.value)) {
-  //   console.log("El número ganador no está en el talonario.");
-  //   return;
-  //   Swal.fire("El número ganador no está en el talonario.");
-  // }
-
-  // // Filtrar los ganadores que coinciden con el número ingresado
-  // const ganadores = talonario.filter((numero) => numero === numeroGanador.value);
-
-  // // Seleccionar un ganador aleatorio de entre los que coinciden
-  // const ganadorAleatorio = ganadores[Math.floor(Math.random() * ganadores.length)];
-
-  // console.log("El ganador es el número", ganadorAleatorio);
-  // Swal.fire("El ganador es el número " + ganadorAleatorio);
+  
 }
 
 
@@ -431,12 +412,13 @@ function generarPDF() {
   doc.text(`Fecha del Sorteo: ${fecha.value}`, 10, 30);
   doc.text(`Ganador: ${numeroGanador.value}`, 10, 40);
   doc.text(`Lotería: ${loteria.value}`, 100, 30);
-  doc.text(`Premio: ${premio.value}`, 100, 40);
+
+  // Declarar estas variables antes de usarlas
+  let sumaBoletasDebe = 0;
+  let sumaBoletasEnJuego = 0;
 
   const headers = [["Nombre", "Teléfono", "Dirección", "N° boleta", "Valor", "Estado"]];
   const data = [];
-  let sumaBoletasDebe = 0;
-  let sumaBoletasEnJuego = 0;
 
   for (let i = 0; i < conjunto.value.length; i++) {
     const boleta = conjunto.value[i];
@@ -446,7 +428,7 @@ function generarPDF() {
         boleta.telefono,
         boleta.direccion,
         boleta.id,
-        boleta.valor,
+        boleta.valor.toLocaleString(), 
         boleta.estado === '1' ? "Vendido" : "Debe"
       ]);
 
@@ -455,10 +437,16 @@ function generarPDF() {
       } else if (boleta.estado === '1') {
         sumaBoletasEnJuego += boleta.valor;
       }
-
-      //doc.text(`Número: ${boleta.id}   Nombre: ${boleta.nombre}   Teléfono: ${boleta.telefono}   Valor: ${boleta.valor}   Estado: ${boleta.estado === '1' ? "Vendido" : "Debe"}`, 30, 60 + i * 10);
     }
   }
+
+ 
+  const premioFormateado = parseFloat(premio.value).toLocaleString();
+  doc.text(`Premio: ${premioFormateado}`, 100, 40);
+
+ 
+  const sumaBoletasDebeFormateada = sumaBoletasDebe.toLocaleString();
+  const sumaBoletasEnJuegoFormateada = sumaBoletasEnJuego.toLocaleString();
 
   doc.autoTable({
     startY: 50,
@@ -466,11 +454,12 @@ function generarPDF() {
     body: data,
   });
 
-  doc.text(`Suma de Boletas que Deben: ${sumaBoletasDebe}`, 10, doc.autoTable.previous.finalY + 10);
-  doc.text(`Suma de Boletas en Juego: ${sumaBoletasEnJuego}`, 10, doc.autoTable.previous.finalY + 20);
+  doc.text(`Suma de Boletas que Deben: ${sumaBoletasDebeFormateada}`, 10, doc.autoTable.previous.finalY + 10);
+  doc.text(`Suma de Boletas en Juego: ${sumaBoletasEnJuegoFormateada}`, 10, doc.autoTable.previous.finalY + 20);
 
   doc.save("talonario.pdf");
 }
+
 
 
 
@@ -520,23 +509,6 @@ function formatoConUnidades(numero) {
         
       </div>
 
-     <!-- <div class="Ganador">
-        <h6>Seleccionar Ganador</h6>
-        <label for="numeroGanador">Número Ganador:</label>
-        <input
-          type="text"
-          id="numeroGanador"
-          placeholder="Escribe el número Ganador "
-          v-model="numeroGanador"
-        />
-        <br />
-        <button @click="seleccionarGanador()">Ganador</button>
-      </div>
-      
-      <div type="button" @click="seleccionarGanador" id="numeroGanador">
-        <img src="../src/assets/recursos_pag_loteria/balota.jpg" alt="" />
-        <p>Elegir Ganador</p>
-      </div>-->
     </div>
     
     <div class="datos">
@@ -715,100 +687,94 @@ function formatoConUnidades(numero) {
     </div>
 
     <div
-      class="modal fade"
-      id="enlistados"
-      data-bs-backdrop="static"
-      data-bs-keyboard="false"
-      tabindex="-1"
-      aria-labelledby="staticBackdropLabel"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h1
-              style="display: flex"
-              class="modal-title fs-5"
-              id="staticBackdropLabel"
-            >
-              <p style="padding-right: 45px; font-size: 20px">
-                Elije uno de los estados:
-              </p>
-              <select v-model="enlistadovalue">
-                <option style="color: #1dd1a1" value="1">Jugando</option>
-                <option style="color: blue" value="2">Disponible</option>
-                <option style="color: red" value="3">En deuda</option>
-              </select>
-            </h1>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              @click="sacar()"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="modal-body">
-            <table class="table table-hover">
-              <thead class="table-dark">
-                <tr>
-                  <td>Nombre</td>
-                  <td>Telefono</td>
-                  <td>Direccion</td>
-                  <td>#Puesto</td>
-                  <td>Estado</td>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(p, i) in enlis" :key="i">
-                  <td>
-                    <b>{{ p.nombre }}</b>
-                  </td>
-                  <td>
-                    <b>{{ p.telefono }}</b>
-                  </td>
-                  <td>
-                    <b>{{ p.direccion }}</b>
-                  </td>
-                  <td>
-                    <b>{{ p.id }}</b>
-                  </td>
-
-                  <td>
-                    <b style="color: red" v-if="p.estado == 3">En deuda</b>
-                    <b style="color: blue" v-else-if="p.estado == 2"
-                      >Disponible</b
-                    >
-                    <b style="color: #1dd1a1" v-else-if="p.estado == 1"
-                      >En juego</b
-                    >
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="modal-footer">
-            <button
-              class="btn btn-primary"
-              v-bind:disabled="deshabi"
-              @click="actualizar()"
-            >
-              Actualizar
-            </button>
-            <button
-              type="button"
-              class="btn btn-secondary"
-              @click="sacar()"
-              data-bs-dismiss="modal"
-            >
-              Close
-            </button>
-          </div>
+    class="modal fade"
+    id="enlistados"
+    data-bs-backdrop="static"
+    data-bs-keyboard="false"
+    tabindex="-1"
+    aria-labelledby="staticBackdropLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1
+            style="display: flex"
+            class="modal-title fs-5"
+            id="staticBackdropLabel"
+          >
+            <p style="padding-right: 45px; font-size: 20px">
+              Elije uno de los estados:
+            </p>
+            <select v-model="enlistadovalue" @change="actualizar">
+              <option style="color: #1dd1a1" value="1">Jugando</option>
+              <option style="color: blue" value="2">Disponible</option>
+              <option style="color: red" value="3">En deuda</option>
+            </select>
+          </h1>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            @click="sacar()"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <table class="table table-hover">
+            <thead class="table-dark">
+              <tr>
+                <td>Nombre</td>
+                <td>Telefono</td>
+                <td>Direccion</td>
+                <td>#Puesto</td>
+                <td>Estado</td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(p, i) in enlis" :key="i">
+                <td>
+                  <b>{{ p.nombre }}</b>
+                </td>
+                <td>
+                  <b>{{ p.telefono }}</b>
+                </td>
+                <td>
+                  <b>{{ p.direccion }}</b>
+                </td>
+                <td>
+                  <b>{{ p.id }}</b>
+                </td>
+  
+                <td>
+                  <b style="color: red" v-if="p.estado == 3">En deuda</b>
+                  <b style="color: blue" v-else-if="p.estado == 2"
+                    >Disponible</b
+                  >
+                  <b style="color: #1dd1a1" v-else-if="p.estado == 1"
+                    >En juego</b
+                  >
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            @click="sacar()"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
         </div>
       </div>
     </div>
+  </div>
+  
 
-    <div id="contenedor" class="cuadrilla">
+    <div id="contenedor" class="cuadrilla" v-if="mj">
       <div v-for="(p, i) in conjunto" id="conjunto_numeros" :key="i">
         <!-- Buttv-on modal -->
         <button
@@ -879,6 +845,7 @@ function formatoConUnidades(numero) {
                   Informacion de la boleta{{ guard }}
                 </h1>
                 <button
+                color="yellow"
                   type="button"
                   class="btn-close"
                   data-bs-dismiss="modal"
@@ -1255,8 +1222,8 @@ input {
 }
 
 .btn-close {
-  background: rgba(188, 188, 243, 0.76);
-  color: #ccffd7;
+ 
+  color: #ffffffec;
 }
 .Ganador {
   /*
