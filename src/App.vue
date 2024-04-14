@@ -413,7 +413,7 @@ function generarPDF() {
   doc.text(`Ganador: ${numeroGanador.value}`, 10, 40);
   doc.text(`Lotería: ${loteria.value}`, 100, 30);
 
-  // Declarar estas variables antes de usarlas
+  
   let sumaBoletasDebe = 0;
   let sumaBoletasEnJuego = 0;
 
